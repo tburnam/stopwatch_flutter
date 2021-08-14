@@ -86,52 +86,75 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'Elapsed Time:',
-            ),
-            Text(
-              '$_timeString',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-            new ButtonBar(
-              mainAxisSize: MainAxisSize.min, // this will take space as minimum as posible(to center)
+        child: Padding(
+            padding: EdgeInsets.fromLTRB(0.0, 100.0, 0.0, 0.0),
+            child: new Column(
+              mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
-                new ElevatedButton(
-                  child: new Text('Start'),
-                  onPressed: () {
-                    timerStream = secondStream();
-                    timerSubscription = timerStream!.listen((int newTick) {
-                      setState(() {
-                        _timeString = convertSecondsToMMSS(newTick);
-                        isActive = true;
-                      });
-                    });
-                  },
+                Text(
+                  'Elapsed Time:',
                 ),
-                new ElevatedButton(
-                  child: new Text('Stop'),
-                  onPressed: () {
+                Text(
+                  '$_timeString',
+                  style: Theme.of(context).textTheme.headline4,
+                ),
+                new ButtonBar(
+                  mainAxisSize: MainAxisSize.min, // this will take space as minimum as posible(to center)
+                  children: <Widget>[
+                    new ElevatedButton(
+                      child: new Text('Start'),
+                      onPressed: () {
+                        timerStream = secondStream();
+                        timerSubscription = timerStream!.listen((int newTick) {
+                          setState(() {
+                            _timeString = convertSecondsToMMSS(newTick);
+                            isActive = true;
+                          });
+                        });
+                      },
+                    ),
+                    new ElevatedButton(
+                      child: new Text('Stop'),
+                      onPressed: () {
+                        timerStream = null;
+                        timerSubscription.cancel();
+                        setState(() {
+                          _timeString = "00:00";
+                          isActive = false;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+                Visibility(
+                  visible: isActive,
+                  child: new ElevatedButton(child: new Text('Lap'), onPressed: () {
                     timerStream = null;
-                    timerSubscription.cancel();
-                    setState(() {
-                      _timeString = "00:00";
-                      isActive = false;
-                    });
-                  },
+                  }),
                 ),
+                Visibility(
+                    visible: isActive,
+                    child: new ListView(
+                      shrinkWrap: true,
+                      children: ListTile.divideTiles(
+                        context: context,
+                        tiles: [
+                          ListTile(
+                            title: Text('a'),
+                          ),
+                          ListTile(
+                            title: Text('b'),
+                          ),
+                          ListTile(
+                            title: Text('c'),
+                          ),
+                        ],
+                      ).toList(),
+                    )
+                )
               ],
             ),
-            Visibility(
-              visible: isActive,
-                child: new ElevatedButton(child: new Text('Lap'), onPressed: () {
-                  timerStream = null;
-                }),
-            )
-          ],
-        ),
+        )
       ),
     );
   }
