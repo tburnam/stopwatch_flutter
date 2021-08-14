@@ -78,9 +78,14 @@ class _MyHomePageState extends State<MyHomePage> {
   Stream<int>? timerStream;
   late StreamSubscription<int> timerSubscription;
   bool isActive = false;
+  final List<String> laps = <String>[];
+  ScrollController _scrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
+    if (laps.isNotEmpty) {
+      _scrollController.animateTo(_scrollController.position.maxScrollExtent, duration: Duration(milliseconds: 200), curve: Curves.easeOut);
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -121,6 +126,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         setState(() {
                           _timeString = "00:00";
                           isActive = false;
+                          laps.clear();
                         });
                       },
                     ),
@@ -130,26 +136,36 @@ class _MyHomePageState extends State<MyHomePage> {
                   visible: isActive,
                   child: new ElevatedButton(child: new Text('Lap'), onPressed: () {
                     timerStream = null;
+                    setState(() {
+                      laps.add(_timeString);
+                    });
                   }),
                 ),
                 Visibility(
                     visible: isActive,
-                    child: new ListView(
-                      shrinkWrap: true,
-                      children: ListTile.divideTiles(
-                        context: context,
-                        tiles: [
-                          ListTile(
-                            title: Text('a'),
-                          ),
-                          ListTile(
-                            title: Text('b'),
-                          ),
-                          ListTile(
-                            title: Text('c'),
-                          ),
-                        ],
-                      ).toList(),
+                    child: Expanded(
+                        child: ListView.builder(
+                            shrinkWrap: true,
+                            padding: const EdgeInsets.all(8),
+                            controller: _scrollController,
+                            itemCount: laps.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return Container(
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    bottom: BorderSide(width: 0.1, color: Colors.grey),
+                                  )
+                                ),
+                                margin: EdgeInsets.all(2),
+                                child: Center(
+                                    child: Text('Lap ${index + 1}: ${laps[index]}',
+                                      style: TextStyle(fontSize: 18),
+                                    )
+                                ),
+                              );
+                            }
+                        )
                     )
                 )
               ],
